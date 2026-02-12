@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>se mi 14 de febrero pofavo</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    background: pink;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Center everything vertically */
+    min-height: 100vh;
+    overflow-x: hidden;
+    text-align: center;
+}
+
+/* TITLE */
+h1 {
+    font-size: 3.2em;
+    margin-bottom: 30px;
+}
+
+/* BIG GIFS */
+#sadImage, #finalHappyImage {
+    width: 100%;   
+    max-width: 500px;      /* Huge width */
+    height: auto;       /* Fixed height */
+    object-fit: contain;   /* Maintain aspect ratio without squishing */
+    border-radius: 22px;
+    margin: 20px auto;
+    display: block;
+}
+
+/* BUTTON AREA */
+#buttonContainer {
+    margin-top: 40px;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+/* BUTTONS */
+button {
+    font-size: 32px;
+    padding: 22px 44px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    white-space: nowrap;
+}
+
+#yes {
+    background: #e60000;
+    color: rgb(247, 247, 247);
+    width: 250px;
+}
+
+#no {
+    background: white;
+    color: black;
+    width: 250px;
+}
+
+/* FIST */
+#fist {
+    position: fixed;
+    font-size: 64px;
+    left: +10px;
+    top: -40px;
+    display: none;
+    z-index: 999;
+    pointer-events: none;
+}
+
+/* HEARTS */
+.heart {
+    position: absolute;
+    font-size: 38px;
+    animation: float 3s linear infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    50% { transform: translateY(-60px) scale(1.2); opacity: 0.8; }
+    100% { transform: translateY(-120px) scale(1); opacity: 0; }
+}
+
+/* FIST PUNCH */
+@keyframes fistPunch {
+    0% { transform: translate(0,0) scale(1); }
+    60% { transform: translate(var(--hit-x), var(--hit-y)) scale(1.2); }
+    80% { transform: translate(calc(var(--hit-x) - 10px), calc(var(--hit-y) + 8px)) scale(1.35); }
+    100% { transform: translate(var(--hit-x), var(--hit-y)) scale(1.25); }
+}
+
+/* YES BOUNCE */
+@keyframes yesBounce {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.18); }
+    60% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* NO SHAKE */
+@keyframes noShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-12px); }
+    50% { transform: translateX(12px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎵 BACKGROUND MUSIC -->
+<audio id="bgMusic" loop>
+  <source src="2much.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="LoudBuzzer" volume="0.1">
+  <source src="LoudBuzzer.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="CorrectBuzzer" volume="0.1">
+  <source src="Grunt.mp3" type="audio/mpeg">
+</audio>
+
+<div id="mainContent">
+<h1>guil yu bi mai valiente? </h1>
+<img src="minion.webp" id="sadImage">
+
+<div id="buttonContainer">
+    <button id="yes">Yei </button>
+    <button id="no">Nein </button>
+</div>
+</div>
+
+<div id="fist">👊</div>
+
+<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
+
+<script>
+const bgMusic = document.getElementById("bgMusic");
+bgMusic.volume = 0;
+document.addEventListener("click", () => {
+  if(bgMusic.paused){
+    bgMusic.play().catch(()=>{});
+    let vol = 0;
+    const fadeIn = setInterval(()=>{
+      vol += 0.02;
+      if(vol >= 0.5){ vol=0.5; clearInterval(fadeIn);}
+      bgMusic.volume = vol;
+    },100);
+  }
+},{once:true});
+
+let noClicks = 0;
+const messages = [
+  "No? 😭",
+  "POFAVO🥺",
+  "EY😫",
+  "CHIQUILLA 😢",
+  "YAA😭",
+];
+
+const yesBtn = document.getElementById("yes");
+const noBtn = document.getElementById("no");
+const fist = document.getElementById("fist");
+const mainContent = document.getElementById("mainContent");
+const audio = document.getElementById("LoudBuzzer");
+const audio2 = document.getElementById("CorrectBuzzer");
+
+/* HEARTS */
+function createHeart(){
+  const heart = document.createElement("div");
+  heart.className="heart";
+  heart.innerText="❤️";
+  heart.style.left = yesBtn.offsetLeft + Math.random()*yesBtn.offsetWidth + "px";
+  heart.style.top = yesBtn.offsetTop + "px";
+  document.body.appendChild(heart);
+  setTimeout(()=>heart.remove(),3000);
+}
+
+/* NO CLICK */
+noBtn.addEventListener("click", ()=>{
+  audio.play();
+  if(noClicks>=5) return;
+  noClicks++;
+
+  noBtn.innerText = messages[noClicks-1];
+  yesBtn.style.width = Math.min(320+noClicks*14,window.innerWidth-40)+"px";
+  createHeart();
+
+
+
+  if(noClicks===5){
+    const rect = noBtn.getBoundingClientRect();
+    fist.style.display = "block";
+    fist.style.setProperty("--hit-x", rect.left+"px");
+    fist.style.setProperty("--hit-y", rect.top+"px");
+    fist.style.animation = "fistPunch 0.9s ease-out forwards";
+    yesBtn.style.animation = "yesBounce 0.6s";
+    noBtn.style.animation = "noShake 0.6s";
+
+    setTimeout(()=>{
+      noBtn.style.display="none";
+      fist.style.display="none";
+      yesBtn.style.width="500px";
+      yesBtn.style.fontSize="45px";
+    },900);
+  }
+});
+
+/* YES CLICK */
+yesBtn.addEventListener("click", ()=>{
+  audio2.play();
+  mainContent.style.display = "none";
+
+  const finalScreen = document.createElement("div");
+  finalScreen.style.textAlign="center";
+  finalScreen.style.paddingTop="60px";
+  finalScreen.innerHTML = `
+    <h1 style="font-size:5em;">AWEBO</h1>
+    <p style="font-size:3em;">te amo mai lov..</p>
+    <img id="finalHappyImage" src="japi.webp">
+    <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
+  `;
+  document.body.appendChild(finalScreen);
+  startConfetti();
+});
+
+/* CONFETTI */
+function startConfetti(){
+  const canvas=document.getElementById("confettiCanvas");
+  const ctx=canvas.getContext("2d");
+  canvas.width=innerWidth;
+  canvas.height=innerHeight;
+
+  const confetti = Array.from({length:120}, ()=>({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*6+4,
+    d: Math.random()*100,
+    color: `hsl(${Math.random()*360},100%,50%)`
+  }));
+
+  let angle = 0;
+  setInterval(()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    angle+=0.01;
+    confetti.forEach(c=>{
+      ctx.beginPath();
+      ctx.strokeStyle=c.color;
+      ctx.lineWidth=c.r;
+      ctx.moveTo(c.x,c.y);
+      ctx.lineTo(c.x+2,c.y+c.r*2);
+      ctx.stroke();
+      c.y+=Math.cos(angle+c.d)+3;
+      if(c.y>canvas.height) c.y=-10;
+    });
+  },20);
+}
+</script>
+
+</body>
+</html>
